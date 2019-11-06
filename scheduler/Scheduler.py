@@ -3,21 +3,43 @@ from collections import OrderedDict
 
 
 class Scheduler(object):
+    """
+    Class for schedule and execute task instances of class :class:`Task`
+    """
     def __init__(self):
         self.queue = list()
         self.preceding_task_map = dict()
         self._result_map = dict()  # need only for tests
 
     def add_task_to_queue(self, task):
+        """
+        Add task to queue
+
+        :param task: Task to be added to queue
+        :return:
+        :raises Exception: If value is not instance of class Task
+        """
         if not isinstance(task, Task):
             raise Exception('New task has to be an instance of subclass of Task')
 
         self.queue.append(task)
 
     def get_queue(self):
+        """
+        Get queue
+
+        :return: queue
+        :rtype: list
+        """
+
         return self.queue
 
     def run_tasks(self):
+        """
+        Method to run all tasks from queue
+        :raises Exception: if execution graph based on preceding tasks constructed incorrect or queue is empty
+        """
+
         # check that queue is not empty
         if len(self.queue) != 0:
             self._result_map = dict()
@@ -60,5 +82,6 @@ class Scheduler(object):
             raise Exception('Scheduler has no tasks to run')
 
     def clear_queue(self):
+        """Clear queue"""
         self.queue = list()
         self._result_map = dict()
