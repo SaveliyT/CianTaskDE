@@ -12,6 +12,7 @@ class Task(object):
             self.name = self.__class__.__name__
 
     def process(self):
+        '''Main execution body for task. Should be implemented in child class'''
         raise NotImplementedError("Method process of task {} did not implemented".format(self.name))
 
     def get_preceding_tasks(self):
