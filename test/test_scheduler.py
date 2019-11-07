@@ -76,7 +76,7 @@ class SchedulerProcessTasksTestCase(unittest.TestCase):
         with self.assertRaises(Exception) as exception_context:
             scheduler.run_tasks()
         self.assertEqual(str(exception_context.exception),
-                         'Some tasks were not executed')
+                         'Some tasks were not executed due to incorrect execution graph')
 
     def test_run_scheduler_with_empty_queue(self):
         scheduler = Scheduler()

@@ -1,11 +1,28 @@
+import sys
+import logging
 from scheduler.Task import Task
 from collections import OrderedDict
+from logging.handlers import RotatingFileHandler
+
+logger = logging.getLogger("Scheduler")
+fh = RotatingFileHandler("scheduler.log", maxBytes=1024*1024*1024, backupCount=5)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+
+sh = logging.StreamHandler(sys.stdout)
+sh.setFormatter(formatter)
+
+logger.addHandler(fh)
+logger.addHandler(fh)
+
+logger.setLevel(logging.INFO)
 
 
 class Scheduler(object):
     """
     Class for schedule and execute task instances of class :class:`Task`
     """
+
     def __init__(self):
         self.queue = list()
         self.preceding_task_map = dict()
@@ -37,6 +54,7 @@ class Scheduler(object):
     def run_tasks(self):
         """
         Method to run all tasks from queue
+
         :raises Exception: if execution graph based on preceding tasks constructed incorrect or queue is empty
         """
 
@@ -52,7 +70,7 @@ class Scheduler(object):
 
             # iterate over map
             while len(ordered_map) > 0:
-                print(ordered_map.items())
+                logger.debug(ordered_map.items())
                 task_executed = False
                 key_to_remove = 0
                 for item in ordered_map.items():
@@ -62,9 +80,12 @@ class Scheduler(object):
                         task_executed = True
                         # get instance of task by index from queue and execute
                         task = self.queue[item[0]]
-                        print("executing task {}".format(task.name))
-                        self._result_map[task] = task.process()
-
+                        logger.info("executing task {}".format(task.name))
+                        try:
+                            self._result_map[task] = task.process()
+                        except Exception as e:
+                            logger.exception("Task {} failed with exception:\n{}".format(task.name, e))
+                            raise e
                         # remove executed task from preceding tasks list for other tasks
                         for value in ordered_map.values():
                             if task in value:
@@ -76,7 +97,7 @@ class Scheduler(object):
                     ordered_map.pop(key_to_remove)
                 # if map does not contain task with empty preceding tasks list throw an error
                 else:
-                    raise Exception("Some tasks were not executed")
+                    raise Exception("Some tasks were not executed due to incorrect execution graph")
 
         else:
             raise Exception('Scheduler has no tasks to run')
